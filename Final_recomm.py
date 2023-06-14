@@ -6,7 +6,7 @@ from operator import itemgetter
 import time
 import sqlalchemy
 from sqlalchemy import create_engine
-import urllib.parse
+import credentials 
 
 class RecommendationEngineASS:
     def __init__(self, hostname, database, user, password):
@@ -110,7 +110,7 @@ AND  lookup_key = 'category_code'
         db_connection.commit()
         
 
-obj = RecommendationEngineASS("199.58.208.77", "db_gfmretail", "db_admin", "admin@pa$$word")    
+obj = RecommendationEngineASS(credentials.host,  credentials.database, credentials.user, credentials.password)    
 obj.connectDB()
 c_data, data = obj.getDF()
 '''c_data.to_csv('data_new.csv',index=False)
@@ -204,7 +204,7 @@ for user,reviews in test_favor_by_users.items():
                 incorrect_counts[candidate_rule] += 1
 test_confidence = {candidate_rule: correct_counts[candidate_rule] / float(correct_counts[candidate_rule]+incorrect_counts[candidate_rule])
                        for candidate_rule in rule_confidence}
-obj.truncTable("199.58.208.77", "db_gfmretail", "db_admin", "admin@pa$$word")
+obj.truncTable(credentials.host,  credentials.database, credentials.user, credentials.password) 
 
 df = pd.DataFrame(columns=["id", "if_bought", "then_also", "created_at", "updated_at"])
 for i in range(len(test_confidence)):
@@ -214,17 +214,17 @@ for i in range(len(test_confidence)):
     df.loc[len(df)] = [len(df)+1,premise_name,conclusion_name,pd.to_datetime('now').strftime("%Y-%m-%d %H:%M:%S"),pd.to_datetime('now').strftime("%Y-%m-%d %H:%M:%S")]
 
 print(len(df))
-obj.insertToDB("199.58.208.77", "db_gfmretail", "db_admin", "admin@pa$$word",df.sort_values('id') )
+obj.insertToDB(credentials.host,  credentials.database, credentials.user, credentials.password ,df.sort_values('id') )
 
 #To read the final data in xlsx
 
-db_connection = sql.connect(host="199.58.208.77",  database="db_gfmretail", user="db_admin", password="admin@pa$$word")
+db_connection = sql.connect(credentials.host,  credentials.database, credentials.user, credentials.password)
 db_cursor = db_connection.cursor()
 sql_ = "select * from recommendation_engine_tmp"
 
 db_cursor.execute(sql_)
 
-table_rows = db_cursor.fetchall()
+'''table_rows = db_cursor.fetchall()
 data = pd.DataFrame(table_rows, columns = df.columns.tolist())
 print(data)
-data.to_excel("Final_data.xlsx", index=False)
+data.to_excel("Final_data.xlsx", index=False)'''
